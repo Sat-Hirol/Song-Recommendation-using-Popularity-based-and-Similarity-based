@@ -1,0 +1,99 @@
+import import_ipynb import pandas as pd import numpy as np import recommender1 as recommender1
+
+#song_df_1=pd.read_csv('Book1.csv') song_df_1=pd.read_csv('dataset1.csv')
+
+song_df_1.head(10)
+
+song_df_1.shape
+
+song_df_1.columns
+
+song_df_1.isnull()
+
+song_df_11=song_df_1.dropna()
+
+print(len(song_df_11))
+
+#song_df_2=pd.read_csv('Book2.csv') song_df_2=pd.read_csv('dataset2.csv')
+
+song_df_2.head(10)
+
+song_df_2.shape
+
+song_df_2.columns
+
+song_df_2.isnull()
+
+song_df_22=song_df_2.dropna()
+
+print(len(song_df_22))
+
+#combining both Data
+
+song_df=pd.merge(song_df_11,song_df_22.drop_duplicates(['song_id']),on='song_id',how='left')
+
+song_df.head(10)
+
+len(song_df)
+
+song_df.isnull()
+
+song_df=song_df.dropna()
+
+#print(len(song_df_1),len(song_df_2)) print(len(song_df_11)) print(len(song_df_22)) print(len(song_df))
+
+#len(song_df)
+
+song_df.shape
+
+song_df.isnull()
+
+song_df.columns
+
+song_df['song']=song_df['title']+"---"+song_df['artist_name']
+
+song_df.head(10)
+
+##cumulative sum of listen countof the song
+
+song_grouped=song_df.groupby(['song']).agg({'listen_count':"count"}).reset_index()
+
+song_grouped.sort_values('listen_count',ascending = 0)
+
+users = song_df['user_id'].unique() len(users)
+
+items = song_df['song'].unique() len(items)
+
+grouped_sum=song_grouped['listen_count'].sum() song_grouped['precentage']=(song_grouped['listen_count']/grouped_sum)*100 song_grouped.sort_values(['listen_count','song'],ascending=[0,1])
+
+pr=recommender1.popularity_recommender_py()
+
+from sklearn.model_selection import train_test_split train_data, test_data = train_test_split(song_df, test_size = 0.20, random_state=0)
+
+pr.create(train_data, 'user_id', 'song')
+
+print(len(train_data)) train_data.head(10)
+
+##pr.create(song_df,'user_id','song') pr.recommend(users[10])
+
+##Display top 10 popular songs
+
+pr.recommend(song_df['user_id'][10])
+
+ir=recommender1.item_similarity_recommenders_py()
+
+ir.create(song_df,'user_id','song')
+
+user_items=ir.get_user_items(song_df['user_id'][5])
+
+##Display user song history
+
+for user_item in user_items: print(user_item)
+
+##give song recommendation for that user
+
+ir.recommend(song_df['user_id'][1000])
+
+##give related songs based on words
+
+ir.get_similar_items(['jab tak hai jaan'])
